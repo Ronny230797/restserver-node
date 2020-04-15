@@ -1,6 +1,10 @@
 require('./config/config') //Al ser el primer import la app la actva primero, haciendo las configuracion antes de todo
 
+
 const express = require('express')
+const mongoose = require('mongoose')
+
+
 const app = express()
 const bodyParser = require('body-parser')
 
@@ -12,42 +16,15 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
+//Aqui estoy importando los controllers de usuario para que tengan acceso a ser consultados
+app.use(require('./controllers/usuario'))
 
-app.get('/usuario', function(req, res) {
-    res.json('get usuario')
+//Conexion bd mongo(port 27017 y collection(db) cafe)
+mongoose.connect(process.env.URLDB, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }, (err, res) => {
+    if (err) throw err;
+    console.log('Base Datos online');
 })
 
-//Debemos atrapar el paiload, la informacion que viene desde la app web(interfaz), a el backend
-//Esto lo haremos con body-parser, es un npm, que convierte la informacion recibida en un obj json
-app.post('/usuario', function(req, res) {
-
-    let body = req.body
-
-    if (body.nombre === undefined) {
-        res.status(400).json({
-            ok: false,
-            mensaje: 'El nombre es necesario, no se recibio "undefined"'
-        })
-    } else {
-        res.json({
-            persona: body
-        })
-    }
-
-})
-
-//Al pasar parametros por url se hace asi y se agarra el valor como en la variable let id, con el req.params.varibale
-app.put('/usuario/:id', function(req, res) {
-    let id = req.params.id;
-    res.json({
-        id
-    })
-})
-
-//Ahora no se acostumbra a borrar registros, sino que tengan estado activo y se cambia a inactivo
-app.delete('/usuario', function(req, res) {
-    res.json('delete usuario')
-})
 
 //procees..... es una var global, que fue modificada en la config
 app.listen(process.env.PORT, () => {
